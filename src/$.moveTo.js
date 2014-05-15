@@ -5,11 +5,11 @@
 (function($, window) {
 'use strict';
 
-// If the height/width of $el is equal to the window scroll height/width,
+// If the height/width of $el is equal to the window scroll top/left,
 // then ignore the offset and let the CSS determine the styles.
 //
 // If the height/width of $el plus the total left/top offset is greater
-// than the window scroll height/width, then $el will be displayed off
+// than the window scroll top/left, then $el will be displayed off
 // the bottom/right edge of the screen. To prevent this, move it to just
 // off the bottom/right edge.
 //
@@ -17,7 +17,9 @@
 function getCalculator(dimension) {
   return function($win, $el, position, offset) {
     var d = $el[dimension](),
-      winD = dimension === 'width' ? $win.width() : $win.height() + $win.scrollTop(),
+      winD = dimension === 'width' ?
+          $win.width() + $win.scrollLeft() :
+          $win.height() + $win.scrollTop(),
       direction = dimension === 'width' ? 'left' : 'top';
 
     return (d === winD) ? 0 : (d + position[direction] + offset[direction] > winD) ?
