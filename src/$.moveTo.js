@@ -1,36 +1,41 @@
 /**
  * Moves an element to the specified location or element, and is
  * boundary-aware, so moveable elements will not be displayed off-screen.
- *
- * 
  */
 (function($, window) {
 'use strict';
 
-// If the width of $el is equal to the window width, then ignore the offset
-// and let the CSS determine the styles.
+// If the height/width of $el is equal to the window scroll height/width,
+// then ignore the offset and let the CSS determine the styles.
 //
-// If the width of $el plus the total left offset is greater than the window
-// width, then $el will be displayed off the right edge of the screen. To
-// prevent this, move it to just off the right edge.
+// If the height/width of $el plus the total left/top offset is greater
+// than the window scroll height/width, then $el will be displayed off
+// the bottom/right edge of the screen. To prevent this, move it to just
+// off the bottom/right edge.
 //
 // Otherwise, move $el to passed-in coordinates.
-function calculateLeft($el, position, offset) {
-  var w = $el.width(),
-    winW = $(window).width();
+function getCalculator(dimension) {
+  return function($win, $el, position, offset) {
+    var d = $el[dimension](),
+      winD = dimension === 'width' ? $win.width() : $win.height() + $win.scrollTop(),
+      direction = dimension === 'width' ? 'left' : 'top';
 
-  return (w === winW) ? 0 : (w + position.left + offset.left > winW) ?
-      winW - w - offset.left :
-      position.left + offset.left;
+    return (d === winD) ? 0 : (d + position[direction] + offset[direction] > winD) ?
+        winD - d - offset[direction] :
+        position[direction] + offset[direction];
+  };
 }
 
-var defaultOffset = {
-  left: 0,
-  top: 0
-};
+var calcX = getCalculator('width'),
+  calcY = getCalculator('height'),
+  defaultOffset = {
+    left: 0,
+    top: 0
+  };
 
 $.fn.moveTo = function($to, offset) {
-  var position = $.isPlainObject($to) ? $to : $to.position();
+  var position = $.isPlainObject($to) ? $to : $to.position(),
+    $win = $(window);
 
   offset = $.extend({}, defaultOffset, offset);
 
@@ -39,8 +44,8 @@ $.fn.moveTo = function($to, offset) {
 
     $el.css({
       position: 'absolute',
-      top: position.top + offset.top,
-      left: calculateLeft($el, position, offset)
+      top: calcY($win, $el, position, offset),
+      left: calcX($win, $el, position, offset)
     });
   });
 };

@@ -23,9 +23,8 @@ $toolbar.moveTo({
 });
 ```
 
-The plugin is aware of the window width and behaves as follows:
-If the width of the element is equal to the window width, then the offset will be ignored, and it will be up to you to set the styles in the CSS.
-
-If the element’s width plus the total left offset is greater than the window width, then the element would normally be displayed off the right edge of the screen. To prevent this, the element will be moved to just off the right edge.
-
-Otherwise, the element will be moved to the passed-in coordinates/element.
+The plugin is aware of the window width and vertical scroll position, and behaves as follows:
+  * If the width of the element is equal to the window width, then the offset will be ignored, and it will be up to you to set the styles in the CSS.
+  * If the element’s width plus the total left offset is greater than the window width, then the element would normally be displayed off the right edge of the screen. To prevent this, the element will be moved to just off the right edge.
+  * If the passed-in element or coordinates are at the very bottom of the current scroll position, then the element will be moved directly on top of it.
+  * Otherwise, the element will be moved to the passed-in coordinates/element.
