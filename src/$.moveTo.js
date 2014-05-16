@@ -16,12 +16,15 @@
 // Otherwise, move $el to passed-in coordinates.
 function getCalculator(dimension) {
   return function($win, $el, position, offset) {
-    var d = $el[dimension](),
+    var rect = $el.get(0).getBoundingClientRect(),
+      d = dimension === 'width' ?
+          Math.abs(rect.left - rect.right) :
+          Math.abs(rect.bottom - rect.top),
       winD = dimension === 'width' ?
           $win.width() + $win.scrollLeft() :
           $win.height() + $win.scrollTop(),
       direction = dimension === 'width' ? 'left' : 'top';
-
+console.log(d);
     return (d === winD) ? 0 : (d + position[direction] + offset[direction] > winD) ?
         winD - d - offset[direction] :
         position[direction] + offset[direction];
