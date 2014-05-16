@@ -24,7 +24,7 @@ function getCalculator(dimension) {
           $win.width() + $win.scrollLeft() :
           $win.height() + $win.scrollTop(),
       direction = dimension === 'width' ? 'left' : 'top';
-console.log(d);
+
     return (d === winD) ? 0 : (d + position[direction] + offset[direction] > winD) ?
         winD - d - offset[direction] :
         position[direction] + offset[direction];
