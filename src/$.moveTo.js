@@ -31,6 +31,23 @@ function getCalculator(dimension) {
   };
 }
 
+function getStyles($el, position, offset) {
+  var rect = $el.get(0).getBoundingClientRect(),
+    w = Math.abs(rect.width || rect.left - rect.right),
+    $win = $(window),
+    winW = $win.width();
+
+  if (w >= winW) {
+    return false;
+  }
+
+  return {
+    position: 'absolute',
+    left: getCalculator('width')($win, $el, position, offset),
+    top: getCalculator('height')($win, $el, position, offset)
+  };
+}
+
 var calcX = getCalculator('width'),
   calcY = getCalculator('height'),
   defaultOffset = {
@@ -38,20 +55,19 @@ var calcX = getCalculator('width'),
     top: 0
   };
 
-$.fn.moveTo = function($to, offset) {
+$.fn.moveTo = function($to, offset, staticIfFullWidth) {
   var position = $.isPlainObject($to) ? $to : $to.position(),
     $win = $(window);
 
   offset = $.extend({}, defaultOffset, offset);
 
   return this.each(function() {
-    var $el = $(this);
-
-    $el.css({
-      position: 'absolute',
-      top: calcY($win, $el, position, offset),
-      left: calcX($win, $el, position, offset)
-    });
+    var $el = $(this),
+      css = getStyles($el, position, offset);
+      
+    if (css) {
+      $el.css(css);
+    }
   });
 };
 
