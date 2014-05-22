@@ -89,4 +89,20 @@ describe('$.fn.moveTo Plugin', function() {
       expect($moveable.css('top')).toEqual(anchorY + 'px');
     });
   });
+
+  describe('when the element width is greater than or equal to the window width', function() {
+    beforeEach(function() {
+      $moveable.css('width', '100%');
+      $(document.body).css({
+        margin: 0,
+        padding: 0
+      });
+    });
+
+    it('does something', function() {
+      $moveable.moveTo($a);
+      
+      expect($moveable.css('left')).toEqual('auto');
+    });
+  });
 });

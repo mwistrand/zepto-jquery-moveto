@@ -5,51 +5,50 @@
 (function($, window) {
 'use strict';
 
-// If the height/width of $el is equal to the window scroll top/left,
-// then ignore the offset and let the CSS determine the styles.
+// If the width of $el is equal to the window width,
+// then do nothing and let the CSS determine the styles.
 //
 // If the height/width of $el plus the total left/top offset is greater
-// than the window scroll top/left, then $el will be displayed off
+// than the vertical scroll position/width, then $el will be displayed off
 // the bottom/right edge of the screen. To prevent this, move it to just
 // off the bottom/right edge.
 //
 // Otherwise, move $el to passed-in coordinates.
-function getCalculator(dimension) {
-  return function($win, $el, position, offset) {
+var getPoint = function getPoint(dimension) {
+    return function(d, winD, position, offset) {
+      var direction = (dimension === 'height') ? 'top' : 'left';
+
+      return (d + position[direction] + offset[direction] > winD) ?
+            winD - d - offset[direction] :
+            position[direction] + offset[direction];
+    };
+  },
+
+  getX = getPoint('width'),
+  getY = getPoint('height'),
+
+  getStyles = function($el, position, offset) {
     var rect = $el.get(0).getBoundingClientRect(),
-      d = dimension === 'width' ?
-          Math.abs(rect.left - rect.right) :
-          Math.abs(rect.bottom - rect.top),
-      winD = dimension === 'width' ?
-          $win.width() + $win.scrollLeft() :
-          $win.height() + $win.scrollTop(),
-      direction = dimension === 'width' ? 'left' : 'top';
+      w = Math.abs(rect.width || rect.left - rect.right),
+      $win = $(window),
+      winW = $win.width();
 
-    return (d === winD) ? 0 : (d + position[direction] + offset[direction] > winD) ?
-        winD - d - offset[direction] :
-        position[direction] + offset[direction];
-  };
-}
+    if (w >= winW) {
+      return false;
+    }
 
-function getStyles($el, position, offset) {
-  var rect = $el.get(0).getBoundingClientRect(),
-    w = Math.abs(rect.width || rect.left - rect.right),
-    $win = $(window),
-    winW = $win.width();
+    return {
+      position: 'absolute',
+      left: getX(w, winW, position, offset),
+      top: getY(
+        Math.abs(rect.bottom - rect.top),
+        $win.height() + $win.scrollTop(),
+        position,
+        offset
+      )
+    };
+  },
 
-  if (w >= winW) {
-    return false;
-  }
-
-  return {
-    position: 'absolute',
-    left: getCalculator('width')($win, $el, position, offset),
-    top: getCalculator('height')($win, $el, position, offset)
-  };
-}
-
-var calcX = getCalculator('width'),
-  calcY = getCalculator('height'),
   defaultOffset = {
     left: 0,
     top: 0
@@ -64,7 +63,7 @@ $.fn.moveTo = function($to, offset, staticIfFullWidth) {
   return this.each(function() {
     var $el = $(this),
       css = getStyles($el, position, offset);
-      
+    
     if (css) {
       $el.css(css);
     }
